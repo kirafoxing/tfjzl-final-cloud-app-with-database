@@ -10,26 +10,40 @@
     <div class="container mt-4">
         <h1>Exam Result for {{ course.name }}</h1>
         <hr>
-        <h3>Your Total Score: {{ grade }}</h3>
 
         {% if grade > 0 %}
             <div class="alert alert-success mt-3">
-                <h4>Congratulations! You passed the exam.</h4>
+                <b>Congratulations, {{ user.first_name }}!</b> You have passed the exam and completed the course with score {{ grade }}/100
             </div>
         {% else %}
             <div class="alert alert-danger mt-3">
-                <h4>Sorry, you did not pass the exam. Please try again.</h4>
+                <b>Failed</b> Sorry, {{ user.first_name }}! You have failed the exam with score {{ grade }}/100
             </div>
         {% endif %}
 
         <h4 class="mt-4">Exam Results:</h4>
-        <ul class="list-group">
-            {% for choice in choices %}
-                <li class="list-group-item">
-                    {{ choice.content }} (Question: {{ choice.question.content }})
-                </li>
-            {% endfor %}
-        </ul>
+
+        {% for question in course.question_set.all %}
+        <div class="card mt-1">
+            <div class="card-header"><h5>{{ question.content }}</h5></div>
+            <div class="form-group">
+                {% for choice in question.choice_set.all %}
+                <div class="form-check">
+                    {% if choice.is_correct and choice in choices %}
+                    <div class="text-success">Correct answer: {{ choice.content }}</div>
+                    {% else %}{% if choice.is_correct and not choice in choices %}
+                    <div class="text-warning">Not selected: {{ choice.content }}</div>
+                    {% else %}{% if not choice.is_correct and choice in choices %}
+                    <div class="text-danger">Wrong answer: {{ choice.content }}</div>
+                    {% else %}
+                    <div>{{ choice.content }}</div>
+                    {% endif %}{% endif %}{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
         <a href="{% url 'onlinecourse:course_details' course.id %}" class="btn btn-primary mt-3">Back to Course</a>
     </div>
 </body>
